@@ -110,8 +110,9 @@ public class LIndexer {
 			for(int i=0;i<hits.length;++i) 
 			{
 			    int docId = hits[i].doc;
+			    System.out.println(hits[i].score);
 			    Document d = searcher.doc(docId);
-			    System.out.println((i + 1) + ". " + d.get("isbn") + "\t" + d.get("title"));
+			    System.out.println((i + 1) + ". " + d.get("id") + "\t" + d.get("title"));
 			}
 		} 
 		catch(Exception e) 
