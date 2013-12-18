@@ -17,6 +17,8 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -28,21 +30,11 @@ import org.apache.lucene.util.Version;
 
 import xml.XMLParser;
 
-/*
- * Indexinformation, which are needed:
- * NEWID -> ID
- * DATE	 -> Datum
- * TITLE -> Titel
- * BODY  -> Artikel
- */
-
-/* Analyzer:
+/**
  * 
- * 
+ * @author Julez
+ * This Class provides functionality for constructing index and requesting queries.
  */
-
-
-@SuppressWarnings("unused")
 public class LIndexer {
 	
 	private Analyzer analyzer;
@@ -54,12 +46,18 @@ public class LIndexer {
 	
 	private static String FILENAME = "reut2-000.xml";
 	
+	/**
+	 * Constructing LuceneIndex using Version LUCENE_46
+	 */
 	public LIndexer()
 	{
 		this.analyzer = new StandardAnalyzer(Version.LUCENE_46);
 		this.config = new IndexWriterConfig(Version.LUCENE_46, analyzer);
 	}
 	
+	/**
+	 * Load Documents into index.
+	 */
 	public void loadDocuments()
 	{
 		
@@ -91,6 +89,11 @@ public class LIndexer {
 		}
 	}
 	
+	/**
+	 * Parse the date into necessary form.
+	 * @param xml date format
+	 * @return lucene date format
+	 */
 	private String parseDate(String date)
 	{
 		StringBuilder day = new StringBuilder();
@@ -135,7 +138,11 @@ public class LIndexer {
 		return year.append(month.append(day)).toString();
 	}
 	
-	
+	/**
+	 * LookUpTable for MonthAbbreviations.
+	 * @param month abbreviation
+	 * @return month number
+	 */
 	private String monthTable(String month)
 	{
 		if(month.equals("JAN"))
@@ -167,6 +174,9 @@ public class LIndexer {
 		
 	}
 	
+	/**
+	 * Constructing index into memory.
+	 */
 	public void indexing()
 	{	
 		this.index = new RAMDirectory();
@@ -184,41 +194,51 @@ public class LIndexer {
 			e.printStackTrace();
 		}
 	}
-	
-	/*TODO:
-	 * -check if rangequery with regex "date:\\[\\d{8} [tT][oO] \\d{8}\\]"
-	 * -TermRangeQuery query = new TermRangeQuery("created_at",lowerDate, upperDate, includeLower, includeUpper);
-	 * -put it in the searcher
+
+	/**
+	 * QueryRequest
+	 * @param querystr
+	 * @return ArrayList with Results
 	 */
-	
 	public ArrayList<Result> searchQuery(String querystr)
 	{
 		int hitCount = 10;
 		
 		try 
 		{
-			Query q;
+			BooleanQuery booleanQuery = new BooleanQuery();
+			//regex matches all rangequeries
 			if (querystr.matches(".*:\\[\\d{8} [tT][oO] \\d{8}\\]")){
+				//split after the ":"
 				String[] temp = querystr.split(":");
 				List<String> queryArray = new ArrayList<String>();
 				for (int i=0; i<temp.length; i++){
 					queryArray.add(temp[i]);
 					}
+				//if there are ":"s in the searchterm, concat the wrong splitted strings and restore the ":"s
 				while (queryArray.size() > 2){
 					queryArray.set(0, queryArray.get(0).concat(":").concat(queryArray.get(1)));
 					queryArray.remove(1);					
 				}
+				//searchterm
 				String query = queryArray.get(0);
-				String date1 = queryArray.get(1).substring(1,9);
-				String date2 = queryArray.get(1).substring(13,21);
-			    q = TermRangeQuery.newStringRange("date",date1 , date2, true, true);
+				//Strings to ints for comparison
+				int intDate1 = Integer.parseInt(queryArray.get(1).substring(1,9));
+				int intDate2 = Integer.parseInt(queryArray.get(1).substring(13,21));
+				//back to Strings after comparison
+				String stringDate1 = Integer.toString(min(intDate1, intDate2));
+				String stringDate2 = Integer.toString(max(intDate1, intDate2));
+			    //add to booleanQuery with "BooleanClause.Occur.MUST" to create an AND
+				booleanQuery.add(TermRangeQuery.newStringRange("date", stringDate1 , stringDate2, true, true),BooleanClause.Occur.MUST);
+				booleanQuery.add(new QueryParser(Version.LUCENE_46, "title", analyzer).parse(query),BooleanClause.Occur.MUST);
 			}else{
-				q = new QueryParser(Version.LUCENE_46, "title", analyzer).parse(querystr);
+				//If normal, do normal
+				booleanQuery.add(new QueryParser(Version.LUCENE_46, "title", analyzer).parse(querystr),BooleanClause.Occur.MUST);
 			}
 			IndexReader reader = DirectoryReader.open(index);
 			IndexSearcher searcher = new IndexSearcher(reader);
 			TopScoreDocCollector collector = TopScoreDocCollector.create(hitCount, true);
-			searcher.search(q, collector);
+			searcher.search(booleanQuery, collector);
 			ScoreDoc[] hits = collector.topDocs().scoreDocs;
 			
 			ArrayList<Result> results = new ArrayList<Result>();
@@ -235,5 +255,11 @@ public class LIndexer {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	private int min(int x, int y){
+		return (x < y) ? x : y;
+	}
+	private int max(int x, int y){
+		return (x > y) ? x : y;
 	}
 }

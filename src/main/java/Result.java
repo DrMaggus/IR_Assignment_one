@@ -2,8 +2,8 @@ import org.apache.lucene.document.Document;
 
 public class Result {
 	
-	Document doc;
-	float score;
+	private Document doc;
+	private float score;
 	
 	public Result(Document doc, float score)
 	{
