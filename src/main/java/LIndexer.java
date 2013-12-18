@@ -115,6 +115,10 @@ public class LIndexer {
 				day.insert(i, '0');
 			}
 		}
+		while(day.length() > 2)
+		{
+			day.deleteCharAt(0);
+		}
 		c++;
 		while(date.charAt(c) != '-')
 		{
