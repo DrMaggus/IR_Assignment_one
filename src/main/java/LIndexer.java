@@ -83,11 +83,12 @@ public class LIndexer {
 			for (xml.Lewis.Document doc : lewisDocs) 
 			{
 				Document indexDoc = new Document();
-				Integer tmp = doc.getNewID();
-				if(tmp.toString() != null)
-					indexDoc.add(new StringField("id",tmp.toString(),Field.Store.YES));
+				
 				if(doc.getDate() != null)
-					indexDoc.add(new StringField("date", doc.getDate(), Field.Store.YES));
+				{
+					System.out.println(parseDate(doc.getDate()));
+					indexDoc.add(new StringField("date", parseDate(doc.getDate()), Field.Store.YES));
+				}
 				if(doc.getTitle() != null)
 					indexDoc.add(new TextField("title", doc.getTitle(), Field.Store.YES));
 				if(doc.getBody() != null)
@@ -99,6 +100,82 @@ public class LIndexer {
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	private String parseDate(String date)
+	{
+		StringBuilder day = new StringBuilder();
+		StringBuilder month = new StringBuilder();
+		StringBuilder year = new StringBuilder();
+		
+		int c = 0;
+		while(date.charAt(c) != '-')
+		{
+			day.append(date.charAt(c));
+			c++;
+		}
+		if(day.length() == 1)
+		{
+			day.insert(0, '0');
+		}
+		for(int i = 0; i < day.length(); i++)
+		{
+			if(day.charAt(i) == ' ')
+			{
+				day.deleteCharAt(i);
+				day.insert(i, '0');
+			}
+		}
+		while(day.length() > 2)
+		{
+			day.deleteCharAt(0);
+		}
+		c++;
+		while(date.charAt(c) != '-')
+		{
+			month.append(date.charAt(c));
+			c++;
+		}
+		month = new StringBuilder(this.monthTable(month.toString()));
+		c++;
+		while(date.charAt(c) != ' ')
+		{
+			year.append(date.charAt(c));
+			c++;
+		}
+		return year.append(month.append(day)).toString();
+	}
+	
+	
+	private String monthTable(String month)
+	{
+		if(month.equals("JAN"))
+			return "01";
+		if(month.equals("FEB"))
+			return "02";
+		if(month.equals("MAR"))
+			return "03";
+		if(month.equals("APR"))
+			return "04";
+		if(month.equals("MAY"))
+			return "05";
+		if(month.equals("JUNE"))
+			return "06";
+		if(month.equals("JULY"))
+			return "07";
+		if(month.equals("AUG"))
+			return "08";
+		if(month.equals("SEPT"))
+			return "09";
+		if(month.equals("OCT"))
+			return "10";
+		if(month.equals("NOV"))
+			return "11";
+		if(month.equals("DEC"))
+			return "12";
+		
+		return "00";
+		
 	}
 	
 	public void indexing(String FILENAME)
