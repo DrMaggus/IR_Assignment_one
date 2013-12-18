@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "LEWIS")
 public class Lewis {
-	static class Document {
+	static public class Document {
 		static class Topics {
 			@XmlElement
 			private ArrayList<String> D;

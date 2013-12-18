@@ -23,6 +23,12 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.store.MMapDirectory;
 import org.apache.lucene.store.RAMDirectory;
 
+import xml.Lewis;
+import xml.XMLParser;
+
+
+
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +36,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+
+import javax.xml.bind.JAXBException;
 
 /*
  * Indexinformation, which are needed:
@@ -48,12 +56,14 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class LIndexer {
 	
-	Analyzer analyzer;
-	IndexWriterConfig config; 
-	Directory index;
-	List<Document> documents;
+	private Analyzer analyzer;
+	private IndexWriterConfig config; 
+	private Directory index;
+	private List<Document> documents;
+	private XMLParser parser;
+	private ArrayList<xml.Lewis.Document> lewisDocs;
 	
-
+	private static String FILENAME = "reut2-000.xml";
 	
 	public LIndexer()
 	{
@@ -63,14 +73,32 @@ public class LIndexer {
 	
 	public void loadDocuments()
 	{
-		// TODO: Here loading documents into documents list, which is saved internally
-		// pattern below can be used:
-		/*Document doc = new Document();
-		doc.add(new StringField("id",id,Field.Store.YES));
-		doc.add(new StringField("date", date, Field.Store.YES));
-		doc.add(new TextField("title", title, Field.Store.YES));
-		doc.add(new TextField("body", body, Field.Store.YES));*/
 		
+		try
+		{
+			this.parser = new XMLParser("src//main//resources//" + FILENAME);
+			this.lewisDocs = this.parser.getDocuments();
+			this.documents = new ArrayList<Document>();
+			
+			for (xml.Lewis.Document doc : lewisDocs) 
+			{
+				Document indexDoc = new Document();
+				Integer tmp = doc.getNewID();
+				if(tmp.toString() != null)
+					indexDoc.add(new StringField("id",tmp.toString(),Field.Store.YES));
+				if(doc.getDate() != null)
+					indexDoc.add(new StringField("date", doc.getDate(), Field.Store.YES));
+				if(doc.getTitle() != null)
+					indexDoc.add(new TextField("title", doc.getTitle(), Field.Store.YES));
+				if(doc.getBody() != null)
+					indexDoc.add(new TextField("body", doc.getBody(), Field.Store.YES));
+				this.documents.add(indexDoc);			
+			}
+		}
+		catch(JAXBException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public void indexing(String FILENAME)
@@ -110,9 +138,8 @@ public class LIndexer {
 			for(int i=0;i<hits.length;++i) 
 			{
 			    int docId = hits[i].doc;
-			    System.out.println(hits[i].score);
 			    Document d = searcher.doc(docId);
-			    System.out.println((i + 1) + ". " + d.get("id") + "\t" + d.get("title"));
+			    System.out.println((i + 1) + ". " + d.get("id") + "\t" + d.get("title") + "\nScore: " + hits[i].score);
 			}
 		} 
 		catch(Exception e) 
