@@ -28,21 +28,11 @@ import org.apache.lucene.util.Version;
 
 import xml.XMLParser;
 
-/*
- * Indexinformation, which are needed:
- * NEWID -> ID
- * DATE	 -> Datum
- * TITLE -> Titel
- * BODY  -> Artikel
- */
-
-/* Analyzer:
+/**
  * 
- * 
+ * @author Julez
+ * This Class provides functionality for constructing index and requesting queries.
  */
-
-
-@SuppressWarnings("unused")
 public class LIndexer {
 	
 	private Analyzer analyzer;
@@ -54,12 +44,18 @@ public class LIndexer {
 	
 	private static String FILENAME = "reut2-000.xml";
 	
+	/**
+	 * Constructing LuceneIndex using Version LUCENE_46
+	 */
 	public LIndexer()
 	{
 		this.analyzer = new StandardAnalyzer(Version.LUCENE_46);
 		this.config = new IndexWriterConfig(Version.LUCENE_46, analyzer);
 	}
 	
+	/**
+	 * Load Documents into index.
+	 */
 	public void loadDocuments()
 	{
 		
@@ -91,6 +87,11 @@ public class LIndexer {
 		}
 	}
 	
+	/**
+	 * Parse the date into necessary form.
+	 * @param xml date format
+	 * @return lucene date format
+	 */
 	private String parseDate(String date)
 	{
 		StringBuilder day = new StringBuilder();
@@ -135,7 +136,11 @@ public class LIndexer {
 		return year.append(month.append(day)).toString();
 	}
 	
-	
+	/**
+	 * LookUpTable for MonthAbbreviations.
+	 * @param month abbreviation
+	 * @return month number
+	 */
 	private String monthTable(String month)
 	{
 		if(month.equals("JAN"))
@@ -167,6 +172,9 @@ public class LIndexer {
 		
 	}
 	
+	/**
+	 * Constructing index into memory.
+	 */
 	public void indexing()
 	{	
 		this.index = new RAMDirectory();
@@ -184,13 +192,12 @@ public class LIndexer {
 			e.printStackTrace();
 		}
 	}
-	
-	/*TODO:
-	 * -check if rangequery with regex "date:\\[\\d{8} [tT][oO] \\d{8}\\]"
-	 * -TermRangeQuery query = new TermRangeQuery("created_at",lowerDate, upperDate, includeLower, includeUpper);
-	 * -put it in the searcher
+
+	/**
+	 * QueryRequest
+	 * @param querystr
+	 * @return ArrayList with Results
 	 */
-	
 	public ArrayList<Result> searchQuery(String querystr)
 	{
 		int hitCount = 10;
