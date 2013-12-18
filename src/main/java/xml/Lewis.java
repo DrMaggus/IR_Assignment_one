@@ -6,8 +6,29 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * This class is the pattern or the so called Context class<br>
+ * for the JAXB XML parser. XML with the structure of reut2-000.xml<br>
+ * to find in src/main/resource ist parsed into Objects derived from this class.
+ * 
+ * @author Markus W
+ * @see xml.XMLParser
+ *
+ */
 
-@XmlRootElement(name = "LEWIS")
+//Each child node in the xml file is mapped to an inner class of
+//the root-class. 
+//If a child node contains just data and no further child nodes it's
+//content is saved in the respective class attribute labeled
+//with the annotation @XmlElement
+
+//The Annotations are needed by the JAXB parser to know how to 
+//save a certain node from the xml file to an object of this class
+
+//Each class has its own getter to get the data from the Lewis object
+//after parsing the xml file
+
+@XmlRootElement(name = "LEWIS") //root node of xml file
 public class Lewis {
 	static public class Document {
 		static class Topics {
@@ -115,6 +136,10 @@ public class Lewis {
 	@XmlElement(name="REUTERS")
 	private ArrayList<Document> Documents;
 	
+	/**
+	 * 
+	 * @return returns all 'Reuter' objects
+	 */
 	public ArrayList<Document> getAllDocuments() {
 		return Documents;
 	}
@@ -124,21 +149,3 @@ public class Lewis {
 		return "The XML-File contains: "+Documents.size()+" 'REUTERS-Objects'";
 	}
 }
-
-/*
- *     // Helper class to convert the date string to a Date object
-    private static class DateAdapter extends XmlAdapter<String, LocalDateTime> {
-
-        private static DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss.SS");
-
-        @Override
-        public String marshal(LocalDateTime v) throws Exception {
-            return DATE_FORMAT.print(v);
-        }
-
-        @Override
-        public LocalDateTime unmarshal(String v) throws Exception {
-            return DATE_FORMAT.parseLocalDateTime(v);
-        }
-    }
-    */
