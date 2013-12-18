@@ -33,7 +33,7 @@ public class Main {
 		
 		System.out.println("--- QueryRequest ---");
 		System.out.println("QueryString: 12");
-		indexer.searchQuery("date:[19701210 TO 20000101]");
+		indexer.searchQuery("BAHIA-COCOA-REVIEW:[20000101 TO 19701210]");
 		System.out.println(" -> finished");
 		
 	}
