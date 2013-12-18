@@ -223,7 +223,6 @@ public class LIndexer {
 			searcher.search(q, collector);
 			ScoreDoc[] hits = collector.topDocs().scoreDocs;
 			
-			System.out.println("Found " + hits.length + " hits.");
 			ArrayList<Result> results = new ArrayList<Result>();
 			for(int i=0;i<hits.length;++i) 
 			{
@@ -236,6 +235,7 @@ public class LIndexer {
 		catch(Exception e) 
 		{
 			e.printStackTrace();
+			return null;
 		}
 	}
 }
