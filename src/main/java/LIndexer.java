@@ -1,35 +1,24 @@
+import java.io.File;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.List;
+
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.LongField;
-import org.apache.lucene.document.StringField;
-import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.store.MMapDirectory;
 import org.apache.lucene.store.RAMDirectory;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.*;
+import org.apache.lucene.util.Version;
 
 /*
  * Indexinformation, which are needed:
@@ -93,13 +82,34 @@ public class LIndexer {
 		}
 	}
 	
+	/*TODO:
+	 * -check if rangequery with regex "date:\\[\\d{8} [tT][oO] \\d{8}\\]"
+	 * -TermRangeQuery query = new TermRangeQuery("created_at",lowerDate, upperDate, includeLower, includeUpper);
+	 * -put it in the searcher
+	 */
+	
 	public void searchQuery(String querystr)
 	{
 		int hitCount = 10;
 		
 		try 
 		{
-			Query q = new QueryParser(Version.LUCENE_46, "title", analyzer).parse(querystr);
+			Query q;
+			if (querystr.matches("date:\\[\\d{8} [tT][oO] \\d{8}\\]")){
+			    Calendar calendar1 = Calendar.getInstance();
+			    Calendar calendar2 = Calendar.getInstance();
+			    calendar1.set(Integer.parseInt(querystr.substring(6, 10)), 
+			    			  Integer.parseInt(querystr.substring(10, 12)), 
+			    			  Integer.parseInt(querystr.substring(12, 14)));
+			    calendar2.set(Integer.parseInt(querystr.substring(18, 22)), 
+			    			  Integer.parseInt(querystr.substring(22, 24)), 
+			    			  Integer.parseInt(querystr.substring(24, 26)));
+			    long milliseconds1 = calendar1.getTimeInMillis();
+			    long milliseconds2 = calendar2.getTimeInMillis();
+			    q = NumericRangeQuery.newLongRange("publish_date",milliseconds1, milliseconds2, true, true);
+			}else{
+				q = new QueryParser(Version.LUCENE_46, "title", analyzer).parse(querystr);
+			}
 			IndexReader reader = DirectoryReader.open(index);
 			IndexSearcher searcher = new IndexSearcher(reader);
 			TopScoreDocCollector collector = TopScoreDocCollector.create(hitCount, true);
