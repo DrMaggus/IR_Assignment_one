@@ -31,10 +31,10 @@ public class Main {
 		indexer.searchQuery("12");
 		System.out.println(" -> finished");
 		
-		/*System.out.println("--- QueryRequest ---");
+		System.out.println("--- QueryRequest ---");
 		System.out.println("QueryString: 12");
-		indexer.searchQuery("date:[19921210 TO 20000101]");
+		indexer.searchQuery("date:[19701210 TO 20000101]");
 		System.out.println(" -> finished");
-		*/
+		
 	}
 }

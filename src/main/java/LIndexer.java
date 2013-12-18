@@ -2,7 +2,6 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -19,9 +18,9 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
@@ -210,7 +209,7 @@ public class LIndexer {
 				String query = queryArray.get(0);
 				String date1 = queryArray.get(1).substring(1,9);
 				String date2 = queryArray.get(1).substring(13,21);
-			    //q = NumericRangeQuery.newLongRange("publish_date",milliseconds1, milliseconds2, true, true);
+			    q = TermRangeQuery.newStringRange("date",date1 , date2, true, true);
 			}else{
 				q = new QueryParser(Version.LUCENE_46, "title", analyzer).parse(querystr);
 			}
