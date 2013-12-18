@@ -1,11 +1,18 @@
+
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import javax.xml.bind.JAXBException;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -19,6 +26,8 @@ import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
+
+import xml.XMLParser;
 
 /*
  * Indexinformation, which are needed:
@@ -37,12 +46,14 @@ import org.apache.lucene.util.Version;
 @SuppressWarnings("unused")
 public class LIndexer {
 	
-	Analyzer analyzer;
-	IndexWriterConfig config; 
-	Directory index;
-	List<Document> documents;
+	private Analyzer analyzer;
+	private IndexWriterConfig config; 
+	private Directory index;
+	private List<Document> documents;
+	private XMLParser parser;
+	private ArrayList<xml.Lewis.Document> lewisDocs;
 	
-
+	private static String FILENAME = "reut2-000.xml";
 	
 	public LIndexer()
 	{
@@ -52,14 +63,32 @@ public class LIndexer {
 	
 	public void loadDocuments()
 	{
-		// TODO: Here loading documents into documents list, which is saved internally
-		// pattern below can be used:
-		/*Document doc = new Document();
-		doc.add(new StringField("id",id,Field.Store.YES));
-		doc.add(new StringField("date", date, Field.Store.YES));
-		doc.add(new TextField("title", title, Field.Store.YES));
-		doc.add(new TextField("body", body, Field.Store.YES));*/
 		
+		try
+		{
+			this.parser = new XMLParser("src//main//resources//" + FILENAME);
+			this.lewisDocs = this.parser.getDocuments();
+			this.documents = new ArrayList<Document>();
+			
+			for (xml.Lewis.Document doc : lewisDocs) 
+			{
+				Document indexDoc = new Document();
+				Integer tmp = doc.getNewID();
+				if(tmp.toString() != null)
+					indexDoc.add(new StringField("id",tmp.toString(),Field.Store.YES));
+				if(doc.getDate() != null)
+					indexDoc.add(new StringField("date", doc.getDate(), Field.Store.YES));
+				if(doc.getTitle() != null)
+					indexDoc.add(new TextField("title", doc.getTitle(), Field.Store.YES));
+				if(doc.getBody() != null)
+					indexDoc.add(new TextField("body", doc.getBody(), Field.Store.YES));
+				this.documents.add(indexDoc);	
+			}
+		}
+		catch(JAXBException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public void indexing(String FILENAME)
@@ -95,18 +124,20 @@ public class LIndexer {
 		try 
 		{
 			Query q;
-			if (querystr.matches("date:\\[\\d{8} [tT][oO] \\d{8}\\]")){
-			    Calendar calendar1 = Calendar.getInstance();
-			    Calendar calendar2 = Calendar.getInstance();
-			    calendar1.set(Integer.parseInt(querystr.substring(6, 10)), 
-			    			  Integer.parseInt(querystr.substring(10, 12)), 
-			    			  Integer.parseInt(querystr.substring(12, 14)));
-			    calendar2.set(Integer.parseInt(querystr.substring(18, 22)), 
-			    			  Integer.parseInt(querystr.substring(22, 24)), 
-			    			  Integer.parseInt(querystr.substring(24, 26)));
-			    long milliseconds1 = calendar1.getTimeInMillis();
-			    long milliseconds2 = calendar2.getTimeInMillis();
-			    q = NumericRangeQuery.newLongRange("publish_date",milliseconds1, milliseconds2, true, true);
+			if (querystr.matches(".*:\\[\\d{8} [tT][oO] \\d{8}\\]")){
+				String[] temp = querystr.split(":");
+				List<String> queryArray = new ArrayList<String>();
+				for (int i=0; i<temp.length; i++){
+					queryArray.add(temp[i]);
+					}
+				while (queryArray.size() > 2){
+					queryArray.set(0, queryArray.get(0).concat(":").concat(queryArray.get(1)));
+					queryArray.remove(1);					
+				}
+				String query = queryArray.get(0);
+				String date1 = queryArray.get(1).substring(1,9);
+				String date2 = queryArray.get(1).substring(13,21);
+			    //q = NumericRangeQuery.newLongRange("publish_date",milliseconds1, milliseconds2, true, true);
 			}else{
 				q = new QueryParser(Version.LUCENE_46, "title", analyzer).parse(querystr);
 			}
@@ -120,9 +151,8 @@ public class LIndexer {
 			for(int i=0;i<hits.length;++i) 
 			{
 			    int docId = hits[i].doc;
-			    System.out.println(hits[i].score);
 			    Document d = searcher.doc(docId);
-			    System.out.println((i + 1) + ". " + d.get("id") + "\t" + d.get("title"));
+			    System.out.println((i + 1) + ". " + d.get("id") + "\t" + d.get("title") + "\nScore: " + hits[i].score);
 			}
 		} 
 		catch(Exception e) 
