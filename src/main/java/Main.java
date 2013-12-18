@@ -8,7 +8,7 @@ public class Main {
 		System.out.println("-> finished");
 		
 		System.out.println("--- constructing index ---");
-		indexer.indexing("index");
+		indexer.indexing();
 		System.out.println(" -> finished");
 		
 		System.out.println("--- QueryRequest ---");

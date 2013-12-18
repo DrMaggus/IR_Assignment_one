@@ -74,10 +74,10 @@ public class LIndexer {
 			for (xml.Lewis.Document doc : lewisDocs) 
 			{
 				Document indexDoc = new Document();
-				
+				Integer id = doc.getNewID();
+				indexDoc.add(new StringField("id", id.toString(), Field.Store.YES));
 				if(doc.getDate() != null)
 				{
-					System.out.println(parseDate(doc.getDate()));
 					indexDoc.add(new StringField("date", parseDate(doc.getDate()), Field.Store.YES));
 				}
 				if(doc.getTitle() != null)
@@ -169,11 +169,9 @@ public class LIndexer {
 		
 	}
 	
-	public void indexing(String FILENAME)
+	public void indexing()
 	{	
-		File path = new File("src//main//resources//" + FILENAME);
 		this.index = new RAMDirectory();
-		
 		try 
 		{
 			IndexWriter w = new IndexWriter(index, config);
@@ -195,7 +193,7 @@ public class LIndexer {
 	 * -put it in the searcher
 	 */
 	
-	public void searchQuery(String querystr)
+	public ArrayList<Result> searchQuery(String querystr)
 	{
 		int hitCount = 10;
 		
@@ -236,17 +234,19 @@ public class LIndexer {
 			searcher.search(booleanQuery, collector);
 			ScoreDoc[] hits = collector.topDocs().scoreDocs;
 			
-			System.out.println("Found " + hits.length + " hits.");
+			ArrayList<Result> results = new ArrayList<Result>();
 			for(int i=0;i<hits.length;++i) 
 			{
 			    int docId = hits[i].doc;
 			    Document d = searcher.doc(docId);
-			    System.out.println((i + 1) + ". " + d.get("id") + "\t" + d.get("title") + "\nScore: " + hits[i].score);
+			    results.add(new Result(d, hits[i].score));
 			}
+			return results;
 		} 
 		catch(Exception e) 
 		{
 			e.printStackTrace();
+			return null;
 		}
 	}
 	private int min(int x, int y){
