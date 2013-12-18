@@ -167,11 +167,9 @@ public class LIndexer {
 		
 	}
 	
-	public void indexing(String FILENAME)
+	public void indexing()
 	{	
-		File path = new File("src//main//resources//" + FILENAME);
 		this.index = new RAMDirectory();
-		
 		try 
 		{
 			IndexWriter w = new IndexWriter(index, config);

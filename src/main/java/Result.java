@@ -13,5 +13,4 @@ public class Result {
 	
 	public float getScore() { return this.score; }
 	public Document getDocument() { return this.doc; }
-
 }
