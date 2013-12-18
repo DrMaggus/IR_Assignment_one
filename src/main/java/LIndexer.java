@@ -87,7 +87,7 @@ public class LIndexer {
 				if(doc.getDate() != null)
 				{
 					System.out.println(parseDate(doc.getDate()));
-					indexDoc.add(new StringField("date", doc.getDate(), Field.Store.YES));
+					indexDoc.add(new StringField("date", parseDate(doc.getDate()), Field.Store.YES));
 				}
 				if(doc.getTitle() != null)
 					indexDoc.add(new TextField("title", doc.getTitle(), Field.Store.YES));
@@ -104,7 +104,6 @@ public class LIndexer {
 	
 	private String parseDate(String date)
 	{
-		
 		StringBuilder day = new StringBuilder();
 		StringBuilder month = new StringBuilder();
 		StringBuilder year = new StringBuilder();
