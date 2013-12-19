@@ -1,0 +1,35 @@
+** Concept and approach **
+First we got a general idea of the project. We asked question like:
+What are we suppose to do?
+What are the libraries we ought to use?
+How do we manage the distribution of the tasks?
+
+After this short overview we came up with the following:
+Markus => xml parsing
+Matthias => range queries 
+Julien => normal queries and general overview of lucene
+
+After everybody had worked on his own tasks we came together and
+joined everything together (main-function).
+
+You can find the source code in this folder:
+/src/main/java
+and then in the respective package (folder).
+
+Maybe you want to integrate the project in eclipse,
+to get a better overview of it.
+Just go to eclipse => File => Import => Existing project => select folder 'source/poweryoga'
+
+The "Reuters-xml file" is located in /src/main/resources
+
+
+** RUN PROGRAM **
+
+1. Extract the IR13_Assignment_PowerYoga.tar.gz to a desired path.
+2. Change directory to <desired_path>/IR12_Assignment_PowerYoga
+3. In this directory you'll find a .jar file.
+4. Execute it by typing in 
+
+	java -jar IR13_Assignment_PowerYoga.jar
+	
+into your console.
