@@ -2,8 +2,10 @@ package xml;
 
 import java.util.ArrayList;
 
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -54,6 +56,11 @@ public class Lewis {
 			private String DATELINE;
 			@XmlElement
 			private String BODY;
+			@XmlAnyElement
+			@XmlMixed
+			private ArrayList<String> VALUES;
+			@XmlAttribute(name="TYPE")
+			private String TYPE;
 			
 			public String getTITLE() {
 				return TITLE;
@@ -62,7 +69,12 @@ public class Lewis {
 				return DATELINE;
 			}
 			public String getBODY() {
-				return BODY;
+				String str = "";
+				if(TYPE != null && TYPE.equals("BRIEF"))
+					if (VALUES != null)
+						for(String s : VALUES)
+							str += s;
+				return BODY == null ? str : BODY;
 			}
 		}		
 		@XmlElement

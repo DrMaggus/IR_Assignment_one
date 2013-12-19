@@ -1,3 +1,4 @@
+package indexing;
 import org.apache.lucene.document.Document;
 
 public class Result {
