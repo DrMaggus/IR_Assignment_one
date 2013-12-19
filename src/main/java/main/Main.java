@@ -32,7 +32,6 @@ public class Main {
 		System.out.println(" done\n");
 		
 		//reading search term from keyboard
-		//TODO : PARSING ERRORS OCCUR WHEN USING COLONS ... DUNNO WHY ! :(
 		System.out.println("Please enter your search term below:");
 		while(searchString.split(":")[0].isEmpty()) {
 			System.out.print("=> ");
