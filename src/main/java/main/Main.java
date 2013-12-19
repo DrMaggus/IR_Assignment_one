@@ -62,27 +62,31 @@ public class Main {
 		}
 		
 		//Print out all information until 'quit' is typed in
-		while(true){
-			System.out.println("\nIf you want a more detailed view of a result type in the rank number:");
-			while (detailView < 1 || detailView > rank) {
-				try {
-					System.out.print("=> ");
-					detailView = scanner.nextInt(); //read in user choice
-				} catch (InputMismatchException e) {
-					//if input was not a integer => check if it was quit
-					String in = scanner.next();
-					detailView = 0;
-					if (in.toLowerCase().equals("quit"))
-						return;
+		if (rank != 0) {
+			while(true){
+				System.out.println("\nIf you want a more detailed view of a result type in the rank number:");
+				while (detailView < 1 || detailView > rank) {
+					try {
+						System.out.print("=> ");
+						detailView = scanner.nextInt(); //read in user choice
+					} catch (InputMismatchException e) {
+						//if input was not a integer => check if it was quit
+						String in = scanner.next();
+						detailView = 0;
+						if (in.toLowerCase().equals("quit"))
+							return;
+					}
+					if (detailView < 1 || detailView > rank)
+						System.out.println("Please enter a valid number!");
 				}
-				if (detailView < 1 || detailView > rank)
-					System.out.println("Please enter a valid number!");
+				System.out.println(detailView+".  (Score: "+results.get(detailView-1).getScore()+")  Title: "+results.get(detailView-1).getDocument().get("title").replace("\n", ""));
+				System.out.println("Date: "+makeDateFormat(results.get(detailView-1).getDocument().get("date")));
+				System.out.println("Content:\n"+results.get(detailView-1).getDocument().get("body"));
+				detailView = 0; //reset choice
 			}
-			System.out.println(detailView+".  (Score: "+results.get(detailView-1).getScore()+")  Title: "+results.get(detailView-1).getDocument().get("title").replace("\n", ""));
-			System.out.println("Date: "+makeDateFormat(results.get(detailView-1).getDocument().get("date")));
-			System.out.println("Content:\n"+results.get(detailView-1).getDocument().get("body"));
-			detailView = 0; //reset choice
 		}
+		else
+			System.out.println("-No results found-");
 	}
 	
 	/**
